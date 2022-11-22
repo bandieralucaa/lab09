@@ -1,11 +1,15 @@
 plugins {
     java
     application
+    id("org.danilopianini.gradle-java-qa") version "0.40.0"
+}
+
+tasks.javadoc {
+    isFailOnError = false
 }
 
 repositories {
-    // Use jcenter for resolving dependencies.
-    // You can declare any Maven/Ivy/file repository here.
+    mavenCentral()
     jcenter()
 }
 

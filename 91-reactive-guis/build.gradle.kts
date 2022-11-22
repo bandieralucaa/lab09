@@ -1,6 +1,15 @@
 plugins {
     java
     application
+    id("org.danilopianini.gradle-java-qa") version "0.40.0"
+}
+
+repositories {
+    mavenCentral()
+}
+
+tasks.javadoc {
+    isFailOnError = false
 }
 
 val mainClass: String by project
