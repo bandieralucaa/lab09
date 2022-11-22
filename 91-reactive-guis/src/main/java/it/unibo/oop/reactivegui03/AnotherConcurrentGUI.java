@@ -5,6 +5,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.Time;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
@@ -20,14 +21,18 @@ public final class AnotherConcurrentGUI extends JFrame {
     private static final double HEIGHT_PERC = 0.1;
     private final JLabel display = new JLabel();
 
+    private final Agent agent = new Agent();
+
+    final JButton up = new JButton("up");
+    final JButton down = new JButton("down");
+    final JButton stop = new JButton("stop");
+
     /**
      * Builds a new CGUI.
      */
     public AnotherConcurrentGUI() {
         super();
-        final JButton up = new JButton("up");
-        final JButton down = new JButton("down");
-        final JButton stop = new JButton("stop");
+   
         final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         this.setSize((int) (screenSize.getWidth() * WIDTH_PERC), (int) (screenSize.getHeight() * HEIGHT_PERC));
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -38,19 +43,54 @@ public final class AnotherConcurrentGUI extends JFrame {
         panel.add(stop);
         this.getContentPane().add(panel);
         this.setVisible(true);
-        /*
-         * Create the counter agent and start it. This is actually not so good:
-         * thread management should be left to
-         * java.util.concurrent.ExecutorService
-         */
-        final Agent agent = new Agent();
-        new Thread(agent).start();
-        /*
-         * Register a listener that stops it
-         */
-        stop.addActionListener((e) -> { agent.stopCounting(); up.setEnabled(false); down.setEnabled(false);  stop.setEnabled(false); });
-        up.addActionListener((e) -> agent.up());
-        down.addActionListener((e) -> agent.down());
+      
+        up.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                agent.up();
+            }
+        });
+
+        down.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                agent.down();
+            }
+        });
+
+        stop.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                agent.stopCounting();
+            }
+        });
+
+        new Thread(agent).start();   
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    TimeUnit.SECONDS.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                agent.stopCounting();
+            }
+        }).start();
+   
+    }
+
+    private void stopCounting() {
+        agent.stopCounting();
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                stop.setEnabled(false);
+                up.setEnabled(false);
+                down.setEnabled(false);
+            }
+        });
+        
     }
 
     /*
@@ -74,16 +114,20 @@ public final class AnotherConcurrentGUI extends JFrame {
 
         @Override
         public void run() {
-            while (Thread.sleep(10000)) {
+            while (!this.stop) {
                 try {
                     // The EDT doesn't access `counter` anymore, it doesn't need to be volatile 
                     final var nextText = Integer.toString(this.counter);
                     SwingUtilities.invokeAndWait(() -> AnotherConcurrentGUI.this.display.setText(nextText));
-                
+        
+
                     if(up == true){
                         this.counter++;
+                        Thread.sleep(100);
+                        
                     }else{
                         this.counter--;
+                        Thread.sleep(100);
                     }
                     
                 } catch (InvocationTargetException | InterruptedException ex) {
