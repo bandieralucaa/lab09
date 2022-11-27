@@ -50,7 +50,9 @@ public final class ConcurrentGUI extends JFrame {
         /*
          * Register a listener that stops it
          */
-        stop.addActionListener((e) -> { agent.stopCounting(); up.setEnabled(false); down.setEnabled(false);  stop.setEnabled(false); });
+        stop.addActionListener((e) -> { 
+            agent.stopCounting(); up.setEnabled(false); 
+            down.setEnabled(false);  stop.setEnabled(false); });
         up.addActionListener((e) -> agent.up());
         down.addActionListener((e) -> agent.down());
     }
@@ -81,15 +83,13 @@ public final class ConcurrentGUI extends JFrame {
                     // The EDT doesn't access `counter` anymore, it doesn't need to be volatile 
                     final var nextText = Integer.toString(this.counter);
                     SwingUtilities.invokeAndWait(() -> ConcurrentGUI.this.display.setText(nextText));
-                
-                    if(up == true){
+                    if (up) {
                         this.counter++;
                         Thread.sleep(100);
-                    }else{
+                    } else {
                         this.counter--;
                         Thread.sleep(100);
                     }
-                    
                 } catch (InvocationTargetException | InterruptedException ex) {
                     /*
                      * This is just a stack trace print, in a real program there
@@ -107,14 +107,12 @@ public final class ConcurrentGUI extends JFrame {
             this.stop = true;
         }
 
-        public void up(){
+        public void up() {
             this.up = true;
         }
 
-        public void down(){
+        public void down() {
             this.up = false;
         }
     }
-
-    
 }

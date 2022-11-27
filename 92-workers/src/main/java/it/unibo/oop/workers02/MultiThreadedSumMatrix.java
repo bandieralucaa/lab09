@@ -3,18 +3,25 @@ package it.unibo.oop.workers02;
 import java.util.List;
 import java.util.ArrayList;
 
-public class MultiThreadedSumMatrix implements SumMatrix{
+/**
+ * MultiThreadedSumMatrix class.
+ */
+public class MultiThreadedSumMatrix implements SumMatrix {
     private int n;
 
-    public MultiThreadedSumMatrix(int n) {
+    /**
+     * Costructtor.
+     * @param n
+     */
+    public MultiThreadedSumMatrix(final int n) {
         super();
-        if(n<1) {
+        if (n < 1) {
             throw new IllegalArgumentException("n must be > 0");
         }
         this.n = n;
     }
 
-    private final class Worker extends Thread{
+    private final class Worker extends Thread {
         private final double[][] matrix;
         private final int startpos;
         private final int nelem;
@@ -26,8 +33,7 @@ public class MultiThreadedSumMatrix implements SumMatrix{
             this.startpos = startpos;
             this.nelem = nelem;
         }
-
-        @Override   
+        @Override
         public void run() {
             for (int i = startpos; i < matrix.length && i < startpos + nelem; i++) {
                 for (final double d : this.matrix[i]) {
@@ -41,8 +47,11 @@ public class MultiThreadedSumMatrix implements SumMatrix{
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public double sum(double[][] matrix) {
+    public double sum(final double[][] matrix) {
         final int size = matrix.length / n + matrix .length % n;
         /*
          * Build a list of workers

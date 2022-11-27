@@ -5,7 +5,6 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.InvocationTargetException;
-import java.sql.Time;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
@@ -14,6 +13,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+/**
+ * AnotherConcurrentGUI class.
+ */
 public final class AnotherConcurrentGUI extends JFrame {
 
     private static final long serialVersionUID = 1L;
@@ -23,16 +25,15 @@ public final class AnotherConcurrentGUI extends JFrame {
 
     private final Agent agent = new Agent();
 
-    final JButton up = new JButton("up");
-    final JButton down = new JButton("down");
-    final JButton stop = new JButton("stop");
+    private final JButton up = new JButton("up");
+    private final JButton down = new JButton("down");
+    private final JButton stop = new JButton("stop");
 
     /**
      * Builds a new CGUI.
      */
     public AnotherConcurrentGUI() {
         super();
-   
         final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         this.setSize((int) (screenSize.getWidth() * WIDTH_PERC), (int) (screenSize.getHeight() * HEIGHT_PERC));
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -43,7 +44,6 @@ public final class AnotherConcurrentGUI extends JFrame {
         panel.add(stop);
         this.getContentPane().add(panel);
         this.setVisible(true);
-      
         up.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(final ActionEvent e) {
@@ -64,8 +64,7 @@ public final class AnotherConcurrentGUI extends JFrame {
                 agent.stopCounting();
             }
         });
-
-        new Thread(agent).start();   
+        new Thread(agent).start();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -77,7 +76,6 @@ public final class AnotherConcurrentGUI extends JFrame {
                 agent.stopCounting();
             }
         }).start();
-   
     }
 
     private void stopCounting() {
@@ -90,9 +88,7 @@ public final class AnotherConcurrentGUI extends JFrame {
                 down.setEnabled(false);
             }
         });
-        
     }
-
     /*
      * The counter agent is implemented as a nested class. This makes it
      * invisible outside and encapsulated.
@@ -119,17 +115,13 @@ public final class AnotherConcurrentGUI extends JFrame {
                     // The EDT doesn't access `counter` anymore, it doesn't need to be volatile 
                     final var nextText = Integer.toString(this.counter);
                     SwingUtilities.invokeAndWait(() -> AnotherConcurrentGUI.this.display.setText(nextText));
-        
-
-                    if(up == true){
+                    if (up) {
                         this.counter++;
                         Thread.sleep(100);
-                        
-                    }else{
+                    } else {
                         this.counter--;
                         Thread.sleep(100);
                     }
-                    
                 } catch (InvocationTargetException | InterruptedException ex) {
                     /*
                      * This is just a stack trace print, in a real program there
@@ -147,14 +139,12 @@ public final class AnotherConcurrentGUI extends JFrame {
             this.stop = true;
         }
 
-        public void up(){
-            this.up = true;
-        }
-
-        public void down(){
+        public void down() {
             this.up = false;
         }
-    }
 
-    
+        public void up() {
+            this.up = true;
+        }
+    }
 }
